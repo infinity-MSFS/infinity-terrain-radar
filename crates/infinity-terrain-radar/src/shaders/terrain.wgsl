@@ -16,6 +16,10 @@ struct Uniforms {
     lat_max: f32,         // north edge of assembled heightmap, integer degrees
     tile_res: f32,        // samples per tile side
     height_res: f32,      // meters per stored unit
+    hillshade: f32,       // 1 = shade by slope, 0 = flat TAWS
+    _p0: f32,
+    _p1: f32,
+    _p2: f32,
 };
 
 @group(0) @binding(0) var<uniform> u: Uniforms;
@@ -123,6 +127,9 @@ fn fs(@builtin(position) frag: vec4<f32>) -> @location(0) vec4<f32> {
     let stored = sample_stored(texel);
 
     let elev_m = stored * u.height_res - HEIGHT_OFFSET;
-    let shade = mix(0.45, 1.0, hillshade(texel));
+    var shade = 1.0;
+    if (u.hillshade > 0.5) {
+        shade = mix(0.45, 1.0, hillshade(texel));
+    }
     return vec4<f32>(color_for(elev_m) * shade, 1.0);
 }

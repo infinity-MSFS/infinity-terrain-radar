@@ -22,6 +22,8 @@ fn main() {
 		range_nm: a[4].parse().unwrap(),
 		altitude_ft: a[5].parse().unwrap(),
 		heading: 0.0,
+		// pass "flat" as a 7th arg to disable hillshade (the radar look)
+		hillshade: a.get(7).map(|s| s != "flat").unwrap_or(true),
 	};
 	let t = std::time::Instant::now();
 	let img = r.render(&opt).expect("render");

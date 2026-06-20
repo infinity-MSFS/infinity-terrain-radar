@@ -30,6 +30,9 @@ pub struct FrameOptions {
 	pub heading: f32,
 	/// Aircraft altitude in feet (the color ramp is referenced to this).
 	pub altitude_ft: f32,
+	/// Shade terrain by slope. On reads better for a debug view; off gives the flat
+	/// TAWS look the real ground-map radar shows (and PNG-compresses far smaller).
+	pub hillshade: bool,
 }
 
 impl Default for FrameOptions {
@@ -41,6 +44,7 @@ impl Default for FrameOptions {
 			range_nm: 40.0,
 			heading: 0.0,
 			altitude_ft: 10_000.0,
+			hillshade: true,
 		}
 	}
 }
@@ -78,6 +82,8 @@ struct Uniforms {
 	lat_max: f32,
 	tile_res: f32,
 	height_res: f32,
+	hillshade: f32,
+	_pad: [f32; 3],
 }
 
 pub struct Renderer {
@@ -238,6 +244,8 @@ impl Renderer {
 			lat_max: bounds.lat_max as f32,
 			tile_res: res as f32,
 			height_res: self.height_res as f32,
+			hillshade: if opt.hillshade { 1.0 } else { 0.0 },
+			_pad: [0.0; 3],
 		};
 		self.queue.write_buffer(&self.uniform_buf, 0, bytemuck::bytes_of(&uniforms));
 

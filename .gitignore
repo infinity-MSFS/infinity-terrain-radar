@@ -2,3 +2,4 @@
 *.itr
 *.png
 !db_coverage.png
+INTEGRATION.md

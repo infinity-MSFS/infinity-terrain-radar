@@ -28,6 +28,7 @@ struct App {
 	range_nm: f32,
 	heading: f32,
 	altitude_ft: f32,
+	hillshade: bool,
 
 	texture: Option<egui::TextureHandle>,
 	last_key: Option<FrameKey>,
@@ -43,6 +44,7 @@ struct FrameKey {
 	heading: u32,
 	alt: u32,
 	size: u32,
+	hillshade: bool,
 }
 
 impl Default for App {
@@ -56,6 +58,7 @@ impl Default for App {
 			range_nm: 40.0,
 			heading: 0.0,
 			altitude_ft: 10_000.0,
+			hillshade: true,
 			texture: None,
 			last_key: None,
 			view_size: 768,
@@ -92,6 +95,7 @@ impl App {
 			heading: (self.heading * 10.0) as u32,
 			alt: self.altitude_ft as u32,
 			size: self.view_size,
+			hillshade: self.hillshade,
 		}
 	}
 
@@ -107,6 +111,7 @@ impl App {
 			range_nm: self.range_nm,
 			heading: self.heading,
 			altitude_ft: self.altitude_ft,
+			hillshade: self.hillshade,
 		};
 		match self.renderer.as_mut().unwrap().render(&opt) {
 			Ok(img) => {
@@ -157,6 +162,10 @@ impl eframe::App for App {
 
 				ui.label("Altitude (ft)");
 				ui.add(egui::DragValue::new(&mut self.altitude_ft).speed(100.0).range(0.0..=60_000.0));
+				ui.end_row();
+
+				ui.label("Hillshade");
+				ui.checkbox(&mut self.hillshade, "");
 				ui.end_row();
 			});
 
