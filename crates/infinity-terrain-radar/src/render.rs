@@ -306,7 +306,10 @@ impl Renderer {
 		let cols = (b.lon_max - b.lon_min + 1) as usize;
 		let rows = (b.lat_max - b.lat_min + 1) as usize;
 		let aw = cols * r;
-		let mut out = vec![0u16; aw * rows * r];
+		// Absent tiles (open ocean) fill with sea level so they match real coastline
+		// data and never form a hard seam against present tiles.
+		let sea_level = itr_format::encode_height(0, self.height_res);
+		let mut out = vec![sea_level; aw * rows * r];
 
 		for tlat in b.lat_min..=b.lat_max {
 			for tlon in b.lon_min..=b.lon_max {

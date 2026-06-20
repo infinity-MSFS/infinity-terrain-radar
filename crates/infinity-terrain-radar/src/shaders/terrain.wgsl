@@ -58,6 +58,32 @@ fn sample_stored(texel: vec2<f32>) -> f32 {
     return mix(mix(c00, c10, f.x), mix(c01, c11, f.x), f.y);
 }
 
+// Lambertian hillshade computed in data space from the heightmap neighbours.
+// Independent of zoom — it's a property of the terrain, not the view.
+fn hillshade(texel: vec2<f32>) -> f32 {
+    let hr = u.height_res;
+    let mx = (M_PER_DEG_LAT * u.cos_lat) / u.tile_res; // meters per texel, east
+    let my = M_PER_DEG_LAT / u.tile_res;               // meters per texel, north
+
+    let zl = sample_stored(texel - vec2<f32>(1.0, 0.0)) * hr;
+    let zr = sample_stored(texel + vec2<f32>(1.0, 0.0)) * hr;
+    let zn = sample_stored(texel - vec2<f32>(0.0, 1.0)) * hr; // texel row up = north
+    let zs = sample_stored(texel + vec2<f32>(0.0, 1.0)) * hr;
+
+    let dzdx = (zr - zl) / (2.0 * mx);
+    let dzdy = (zn - zs) / (2.0 * my); // positive northward
+
+    let zenith = radians(45.0);
+    let azimuth = radians(315.0); // light from the north-west
+    let slope = atan(sqrt(dzdx * dzdx + dzdy * dzdy));
+    var aspect = atan2(dzdy, -dzdx);
+    if (aspect < 0.0) {
+        aspect = aspect + 6.28318530718;
+    }
+    let hs = cos(zenith) * cos(slope) + sin(zenith) * sin(slope) * cos(azimuth - aspect);
+    return clamp(hs, 0.0, 1.0);
+}
+
 fn color_for(elev_m: f32) -> vec3<f32> {
     let feet = elev_m * FT_PER_M;
     let alt = u.altitude_ft;
@@ -93,8 +119,10 @@ fn fs(@builtin(position) frag: vec4<f32>) -> @location(0) vec4<f32> {
     // lat/lon -> texel in the north-up, west-left assembled heightmap.
     let col = (lon - u.lon_min) * u.tile_res;            // west->east
     let row = (u.lat_max + 1.0 - lat) * u.tile_res;      // north edge of grid is lat_max+1
-    let stored = sample_stored(vec2<f32>(col, row));
+    let texel = vec2<f32>(col, row);
+    let stored = sample_stored(texel);
 
     let elev_m = stored * u.height_res - HEIGHT_OFFSET;
-    return vec4<f32>(color_for(elev_m), 1.0);
+    let shade = mix(0.45, 1.0, hillshade(texel));
+    return vec4<f32>(color_for(elev_m) * shade, 1.0);
 }

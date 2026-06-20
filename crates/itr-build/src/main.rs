@@ -203,7 +203,9 @@ fn decode_tile(path: &Path, resolution: u16, hres: u16) -> Result<Option<(i32, i
 					}
 				}
 			}
-			let elev = if max_elev == i32::MIN { -1000 } else { max_elev };
+			// A fully-void cell (typically water) reads as sea level, so it blends
+			// seamlessly with real ocean and absent tiles instead of forming a seam.
+			let elev = if max_elev == i32::MIN { 0 } else { max_elev };
 			out[oy * r + ox] = encode_height(elev, hres);
 		}
 	}
