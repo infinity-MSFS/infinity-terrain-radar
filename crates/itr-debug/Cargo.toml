@@ -1,0 +1,15 @@
+[package]
+name = "itr-debug"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "itr-debug"
+path = "src/main.rs"
+
+[dependencies]
+infinity-terrain-radar.workspace = true
+eframe = "0.29"
+rfd = "0.14"

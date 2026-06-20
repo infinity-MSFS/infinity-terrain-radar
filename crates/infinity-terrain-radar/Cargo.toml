@@ -1,0 +1,17 @@
+[package]
+name = "infinity-terrain-radar"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Terrain radar database reader + headless wgpu renderer for the Infinity manager / T-38 ND."
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+itr-format.workspace = true
+bytemuck.workspace = true
+image.workspace = true
+wgpu.workspace = true
+pollster.workspace = true

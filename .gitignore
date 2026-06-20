@@ -1,0 +1,4 @@
+/target
+*.itr
+*.png
+!db_coverage.png

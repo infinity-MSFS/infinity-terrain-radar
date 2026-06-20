@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+	"crates/itr-format",
+	"crates/infinity-terrain-radar",
+	"crates/itr-build",
+	"crates/itr-debug",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Proprietary"
+publish = false
+
+[workspace.dependencies]
+itr-format = { path = "crates/itr-format" }
+infinity-terrain-radar = { path = "crates/infinity-terrain-radar" }
+
+anyhow = "1"
+bytemuck = { version = "1", features = ["derive"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+memmap2 = "0.9"
+zstd = "0.13"
+
+# renderer
+wgpu = "22"
+pollster = "0.3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Builder churns through ~14k tiles; always optimize the heavy deps even in dev.
+[profile.dev.package."*"]
+opt-level = 3
